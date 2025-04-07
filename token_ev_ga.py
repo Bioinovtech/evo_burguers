@@ -5,9 +5,8 @@ from diffusers import StableDiffusionPipeline
 from deap import base, creator, tools
 import random
 from PIL import Image
-import simulacra_rank_image
-import laion_rank_image
-import nima_rank_image
+import src.simulacra_rank_image as simulacra_rank_image
+import src.laion_rank_image as laion_rank_image
 import copy
 import argparse
 import sys
@@ -46,7 +45,7 @@ if args.predictor is not None:
     predictor = args.predictor
 else:
     print("Aesthetic predictor not provided, default is 0 (SAM)")
-    predictor = 2
+    predictor = 0
 
 # Load parameters from the YAML file
 with open("config.yml", "r") as file:
@@ -87,8 +86,6 @@ pipe.scheduler.set_timesteps(num_inference_steps)
 
 if predictor == 1:
     aesthetic_model = laion_rank_image.LAIONAesthetic(device)
-elif predictor == 2:
-    aesthetic_model = nima_rank_image.NIMAAsthetics()
 else:
     aesthetic_model = simulacra_rank_image.SimulacraAesthetic(device)
 
@@ -106,11 +103,12 @@ creator.create("Individual", np.ndarray, fitness=creator.FitnessMax)
 
 # Define the aesthetic evaluation function
 def aesthetic_evaluation(image):
+    image_input = image.permute(2, 0, 1).to(torch.float32)  
     if predictor == 0:
-        aesthetic_score = aesthetic_model.predict(image)
+        aesthetic_score = aesthetic_model.predict_from_tensor(image_input)
     elif predictor == 1 or predictor == 2:
         pil_image = Image.fromarray((image))
-        aesthetic_score = aesthetic_model.predict(pil_image)
+        aesthetic_score = aesthetic_model.predict_from_tensor(image_input)
     else:
         # outras metricas aqui
         return 0
@@ -145,10 +143,11 @@ def generate_image_from_embeddings(token_vector, num_inference_steps=25):
 
     with torch.no_grad():
         image = pipe.vae.decode(tmp_latents / pipe.vae.config.scaling_factor)["sample"]
-    image = (image / 2 + 0.5).clamp(0, 1).squeeze()
-    image = image.cpu().permute(1, 2, 0).numpy()
-    image = (image * 255).round().astype("uint8")
-    
+
+    image = pipe.vae.decode(latents / pipe.vae.config.scaling_factor)["sample"]
+    image = (image / 2 + 0.5).clamp(0, 1)  # Normalize to [0,1]
+    image = image.squeeze(0).permute(1, 2, 0)  # Convert to [H, W, C]
+
     return image
 
 # Tokenize and encode the initial prompt
@@ -182,7 +181,7 @@ def main(seed):
     generator = torch.Generator(device=device)
     generator.manual_seed(seed)
 
-    results_folder = experience_name+"results_"+str(predictor)+"_"+str(seed)
+    results_folder = "results/"+experience_name+"_results_"+str(predictor)+"_"+str(seed)
 
     if not os.path.exists(results_folder):
         os.makedirs(results_folder)
@@ -254,7 +253,9 @@ def main(seed):
 
         best_text_embeddings = torch.tensor(best_ind, device=device).unsqueeze(0)
         best_image = generate_image_from_embeddings(best_text_embeddings)
-        pil_image = Image.fromarray((best_image))
+        best_image_np = best_image.detach().cpu().numpy()
+        best_image_np = (best_image_np * 255).astype(np.uint8)
+        pil_image = Image.fromarray((best_image_np))
         pil_image.save(results_folder+"/best_%d.png" % (gen+1))
 
     best_ind = tools.selBest(population, 1)[0]
@@ -263,7 +264,9 @@ def main(seed):
     # Generate and display the best image
     best_text_embeddings = torch.tensor(best_ind, device=device).unsqueeze(0)
     best_image = generate_image_from_embeddings(best_text_embeddings)
-    pil_image = Image.fromarray((best_image))
+    best_image_np = best_image.detach().cpu().numpy()
+    best_image_np = (best_image_np * 255).astype(np.uint8)
+    pil_image = Image.fromarray((best_image_np))
     pil_image.save(results_folder+"/best_all.png")
 
     results = pd.DataFrame({"generation": list(range(1,NUM_GENERATIONS+1)), "best_fitness": max_fit_list, 
