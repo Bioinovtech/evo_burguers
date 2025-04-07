@@ -13,6 +13,7 @@ import argparse
 import sys
 import os
 import matplotlib.pyplot as plt
+import yaml
 
 parser = argparse.ArgumentParser(description='Receives argument seed (int).')
 
@@ -47,9 +48,26 @@ else:
     print("Aesthetic predictor not provided, default is 0 (SAM)")
     predictor = 2
 
-CROSSOVER_PROB, MUTATION_PROB, IND_MUTATION_PROB = 0.7, 0.9, 0.2
-NUM_GENERATIONS, POP_SIZE, TOURNMENT_SIZE, ELITISM = 100, 100, 3, 1
-LAMBDA = 0.1
+# Load parameters from the YAML file
+with open("config.yml", "r") as file:
+    config = yaml.safe_load(file)
+
+# Extract algorithm parameters
+CROSSOVER_PROB = config["algorithm"]["crossover_prob"]
+MUTATION_PROB = config["algorithm"]["mutation_prob"]
+IND_MUTATION_PROB = config["algorithm"]["ind_mutation_prob"]
+NUM_GENERATIONS = config["algorithm"]["num_generations"]
+POP_SIZE = config["algorithm"]["pop_size"]
+TOURNMENT_SIZE = config["algorithm"]["tournment_size"]
+ELITISM = config["algorithm"]["elitism"]
+LAMBDA = config["algorithm"]["lambda"]
+num_inference_steps = config["algorithm"]["num_inference_steps"]
+guidance_scale = config["algorithm"]["guidance_scale"]
+VECTOR_SIZE = config["algorithm"]["vector_size"]
+height = config["algorithm"]["height"]
+width = config["algorithm"]["width"]
+model_id = config["algorithm"]["model_id"]
+experience_name = config["algorithm"]["experience_name"]
 
 if SEED_PATH is None:
     seed_list = [SEED]
@@ -62,11 +80,7 @@ else:
 device = "cuda:"+cuda_n  if torch.cuda.is_available() else "cpu"
 
 # Load the components of the Stable Diffusion pipeline
-model_id = "CompVis/stable-diffusion-v1-4"
 pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float32).to(device)
-
-num_inference_steps = 50
-guidance_scale = 7.5
 
 # Define the scheduler
 pipe.scheduler.set_timesteps(num_inference_steps)
@@ -80,7 +94,6 @@ else:
 
 MIN_VALUE, MAX_VALUE = 0, pipe.tokenizer.vocab_size-3
 START_OF_TEXT, END_OF_TEXT = pipe.tokenizer.bos_token_id, pipe.tokenizer.eos_token_id
-VECTOR_SIZE = 15
 
 # Create unconditional embeddings for classifier-free guidance
 uncond_input = pipe.tokenizer("", return_tensors="pt", padding="max_length", max_length=77, truncation=True).to(device)
@@ -169,14 +182,12 @@ def main(seed):
     generator = torch.Generator(device=device)
     generator.manual_seed(seed)
 
-    results_folder = "results_"+str(predictor)+"_"+str(seed)
+    results_folder = experience_name+"results_"+str(predictor)+"_"+str(seed)
 
     if not os.path.exists(results_folder):
         os.makedirs(results_folder)
 
     num_channels_latents = pipe.unet.in_channels
-    height = 512
-    width = 512
 
     global latents
     latents = torch.randn((1, num_channels_latents, height // 8, width // 8), device=device, generator=generator, requires_grad=False)
