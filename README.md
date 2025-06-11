@@ -12,18 +12,22 @@ Ensure you have [Conda](https://docs.conda.io/) installed on your system.
 
    If you haven't cloned the repository yet, run:
    
-   ```git clone --recursive <repository-url>```
+   ```bash
+   git clone --recursive <repository-url>
+   ```
 
    If you've already cloned the repository without submodules, run:
    
-   ```git submodule update --init --recursive```
+   ```bash
+   git submodule update --init --recursive
+   ```
 
-2. Create the Conda environment using the `environment.yml` file:
+3. Create the Conda environment using the `environment.yml` file:
     ```bash
     conda env create -f environment.yml
     ```
 
-3. Activate the environment:
+4. Activate the environment:
     ```bash
     conda activate ldm
     ```
