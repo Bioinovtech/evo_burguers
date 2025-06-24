@@ -9,17 +9,25 @@ Ensure you have [Conda](https://docs.conda.io/) installed on your system.
 ### Environment Setup
 
 1. Clone the repository:
-    ```bash
-    git clone <repository_url>
-    cd evo_burguers
-    ```
 
-2. Create the Conda environment using the `environment.yml` file:
+   If you haven't cloned the repository yet, run:
+   
+   ```bash
+   git clone --recursive <repository-url>
+   ```
+
+   If you've already cloned the repository without submodules, run:
+   
+   ```bash
+   git submodule update --init --recursive
+   ```
+
+3. Create the Conda environment using the `environment.yml` file:
     ```bash
     conda env create -f environment.yml
     ```
 
-3. Activate the environment:
+4. Activate the environment:
     ```bash
     conda activate ldm
     ```
