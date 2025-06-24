@@ -107,7 +107,6 @@ def aesthetic_evaluation(image):
     if predictor == 0:
         aesthetic_score = aesthetic_model.predict_from_tensor(image_input)
     elif predictor == 1 or predictor == 2:
-        pil_image = Image.fromarray((image))
         aesthetic_score = aesthetic_model.predict_from_tensor(image_input)
     else:
         # outras metricas aqui
@@ -144,7 +143,6 @@ def generate_image_from_embeddings(token_vector, num_inference_steps=25):
     with torch.no_grad():
         image = pipe.vae.decode(tmp_latents / pipe.vae.config.scaling_factor)["sample"]
 
-    image = pipe.vae.decode(latents / pipe.vae.config.scaling_factor)["sample"]
     image = (image / 2 + 0.5).clamp(0, 1)  # Normalize to [0,1]
     image = image.squeeze(0).permute(1, 2, 0)  # Convert to [H, W, C]
 
