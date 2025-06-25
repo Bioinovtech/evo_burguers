@@ -2,9 +2,9 @@ algorithm:
   crossover_prob: 0.7
   mutation_prob: 0.9
   ind_mutation_prob: 0.2
-  num_generations: 100
-  pop_size: 100
-  tournment_size: 3
+  num_generations: 5
+  pop_size: 10
+  tournament_size: 3
   elitism: 1
   lambda: 0.1
   num_inference_steps: 50
