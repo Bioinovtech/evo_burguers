@@ -40,7 +40,7 @@ The main script for running the project is `token_ev_ga.py`. Below are the argum
 
 - `--seed` (int): Seed for random number generation (for a single run).
 - `--seed_path` (str): Path to the seed list txt file (for multiple runs).
-- `--cuda` (int): CUDA GPU to use.
+- `--cuda` (str):Comma‑separated GPU indices (e.g. '0,1') or empty for CPU.
 - `--predictor` (int): Aesthetic predictor to use:
   - `0`: SAM
   - `1`: LAION
