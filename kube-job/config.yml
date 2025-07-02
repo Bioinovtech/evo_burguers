@@ -1,0 +1,16 @@
+algorithm:
+  crossover_prob: 0.7
+  mutation_prob: 0.9
+  ind_mutation_prob: 0.2
+  num_generations: 5
+  pop_size: 10
+  tournament_size: 3
+  elitism: 1
+  lambda: 0.1
+  num_inference_steps: 50
+  guidance_scale: 7.5
+  vector_size: 15
+  height: 512
+  width: 512
+  model_id: "CompVis/stable-diffusion-v1-4"
+  experience_name: "paper_hamburgers"

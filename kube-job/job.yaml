@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evo-burgers-job
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: evo-burgers
+          image: evo-burgers:latest
+          resources:
+            limits:
+              nvidia.com/gpu: "2"
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yml
+              subPath: config.yml
+          env:
+            - name: DEBIAN_FRONTEND
+              value: noninteractive
+      volumes:
+        - name: config-volume
+          configMap:
+            name: evo-burgers-config
