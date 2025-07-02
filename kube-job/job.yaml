@@ -8,7 +8,8 @@ spec:
       restartPolicy: Never
       containers:
         - name: evo-burgers
-          image: evo-burgers:latest
+          image: localhost/evo-burgers:latest
+          imagePullPolicy: Never
           resources:
             limits:
               nvidia.com/gpu: "2"

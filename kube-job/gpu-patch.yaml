@@ -9,4 +9,4 @@ spec:
         - name: evo-burgers
           resources:
             limits:
-              nvidia.com/gpu: "3" 
+              nvidia.com/gpu: "2" 
