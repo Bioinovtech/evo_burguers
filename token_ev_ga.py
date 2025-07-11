@@ -18,19 +18,6 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor
 
 # -----------------------------------------------------------------------------
-# CLI
-# -----------------------------------------------------------------------------
-
-def get_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Genetic prompt search with SD")
-    parser.add_argument("--seed", type=int, default=42, help="Base RNG seed")
-    parser.add_argument("--seed_path", type=str, help="Path to a file with one seed per line")
-    parser.add_argument("--cuda", type=str, default="0", help="Comma‑separated GPU indices (e.g. '0,1') or empty for CPU")
-    parser.add_argument("--predictor", type=int, default=0, choices=(0, 1), help="Aesthetic model: 0=Simulacra, 1=LAION")
-    return parser.parse_args()
-
-
-# -----------------------------------------------------------------------------
 # Helpers
 # -----------------------------------------------------------------------------
 
@@ -91,11 +78,13 @@ def generate_image_from_embeddings(
 # Main GA logic
 # -----------------------------------------------------------------------------
 
-def run_for_seed(seed: int, cfg: dict, devices: List[str], predictor_choice: int) -> None:
+def run_for_seed(seed: int, cfg: dict, devices: List[str]) -> None:
     random.seed(seed)
     torch.manual_seed(seed)
 
     # -------------------------- load SD pipelines & predictors per device
+    predictor_choice = cfg["predictor"]
+
     pipes: List[StableDiffusionPipeline] = []
     predictors = []
     for dev in devices:
@@ -310,30 +299,28 @@ def _plot_results(df: pd.DataFrame, out_dir: Path) -> None:
 # -----------------------------------------------------------------------------
 
 def main() -> None:
-    args = get_args()
-
-    # --------------------------------------------------------------------- seed list
-    seed_list = [args.seed]
-    if args.seed_path and Path(args.seed_path).exists():
-        with open(args.seed_path) as f:
-            seed_list = [int(line.strip()) for line in f if line.strip()]
-
     # --------------------------------------------------------------------- config
     with open("config.yml") as f:
         cfg = yaml.safe_load(f)["algorithm"]
 
     # sanity: vector size must leave room for BOS/EOS
     assert cfg["vector_size"] <= cfg.get("prompt_max_tokens", 75), "VECTOR_SIZE too large"
-
+    # --------------------------------------------------------------------- seed list
+    seed_list = cfg["seed_list"]
     # --------------------------------------------------------------------- devices
-    if torch.cuda.is_available() and args.cuda:
-        device_strs = [f"cuda:{d}" for d in args.cuda.split(",") if d]
+    if torch.cuda.is_available() and cfg.get("cuda"):
+        if cfg["cuda"] == "all":
+            device_strs = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
+        elif isinstance(cfg["cuda"], list):
+            device_strs = [f"cuda:{d}" for d in cfg["cuda"]]
+        else:
+            device_strs = [f"cuda:{cfg['cuda']}"]
     else:
         device_strs = ["cpu"]
     print("Using devices:", ", ".join(device_strs))
 
     for s in seed_list:
-        run_for_seed(s, cfg, device_strs, args.predictor)
+        run_for_seed(s, cfg, device_strs)
 
 
 if __name__ == "__main__":
