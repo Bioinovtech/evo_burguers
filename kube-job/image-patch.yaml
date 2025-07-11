@@ -1,0 +1,10 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evo-burgers-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: evo-burgers
+          image: evo-burgers:latest 
