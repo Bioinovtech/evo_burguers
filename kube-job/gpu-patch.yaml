@@ -4,9 +4,16 @@ metadata:
   name: evo-burgers-job
 spec:
   template:
+    metadata:
+      labels:
+        kai.scheduler/queue: cisuc-regular
+      annotations:
+        # gpu-fraction: "0.7"
+        # gpu-type: "nvidia-rtx-a6000"
+        gpu-memory: "30720"
     spec:
+      schedulerName: kai-scheduler
+#      nodeSelector:
+#        nvidia.com/gpu.product: "NVIDIA RTX A6000"
       containers:
         - name: evo-burgers
-          resources:
-            limits:
-              nvidia.com/gpu: "2" 

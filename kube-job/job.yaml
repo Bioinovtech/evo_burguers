@@ -8,11 +8,10 @@ spec:
       restartPolicy: Never
       containers:
         - name: evo-burgers
-          image: localhost/evo-burgers:latest
-          imagePullPolicy: Never
+          image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
           resources:
             limits:
-              nvidia.com/gpu: "2"
+              nvidia.com/gpu: "1"
           volumeMounts:
             - name: config-volume
               mountPath: /app/config.yml
