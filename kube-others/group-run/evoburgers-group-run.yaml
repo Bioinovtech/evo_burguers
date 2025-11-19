@@ -1,0 +1,98 @@
+# PodGroup for gang scheduling - all jobs will be scheduled together (all-or-nothing)
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+metadata:
+  name: evo-burgers-group
+spec:
+  minMember: 3  # All 3 jobs must be schedulable together
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evo-burgers-job-1
+spec:
+  template:
+    metadata:
+      labels:
+        kai.scheduler/queue: cisuc-regular
+      annotations:
+        gpu-memory: "21024"
+        scheduling.k8s.io/group-name: evo-burgers-group  # Reference to PodGroup for gang scheduling
+    spec:
+      schedulerName: kai-scheduler
+      restartPolicy: Never
+      containers:
+        - name: evo-burgers
+          image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yml
+              subPath: config.yml
+          env:
+            - name: DEBIAN_FRONTEND
+              value: noninteractive
+      volumes:
+        - name: config-volume
+          configMap:
+            name: evo-burgers-config-1  # Different ConfigMap for job 1
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evo-burgers-job-2
+spec:
+  template:
+    metadata:
+      labels:
+        kai.scheduler/queue: cisuc-regular
+      annotations:
+        gpu-memory: "21024"
+        scheduling.k8s.io/group-name: evo-burgers-group  # Reference to PodGroup for gang scheduling
+    spec:
+      schedulerName: kai-scheduler
+      restartPolicy: Never
+      containers:
+        - name: evo-burgers
+          image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yml
+              subPath: config.yml
+          env:
+            - name: DEBIAN_FRONTEND
+              value: noninteractive
+      volumes:
+        - name: config-volume
+          configMap:
+            name: evo-burgers-config-2  # Different ConfigMap for job 2
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evo-burgers-job-3
+spec:
+  template:
+    metadata:
+      labels:
+        kai.scheduler/queue: cisuc-regular
+      annotations:
+        gpu-memory: "21024"
+        scheduling.k8s.io/group-name: evo-burgers-group  # Reference to PodGroup for gang scheduling
+    spec:
+      schedulerName: kai-scheduler
+      restartPolicy: Never
+      containers:
+        - name: evo-burgers
+          image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yml
+              subPath: config.yml
+          env:
+            - name: DEBIAN_FRONTEND
+              value: noninteractive
+      volumes:
+        - name: config-volume
+          configMap:
+            name: evo-burgers-config-3  # Different ConfigMap for job 3
+

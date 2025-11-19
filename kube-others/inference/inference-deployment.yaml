@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inference-example
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inference-example
+  template:
+    metadata:
+      labels:
+        app: inference-example
+    spec:
+      containers:
+      - name: inference-example
+        image: registry.ml-cluster.dei.uc.pt/library/docs:1.4
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inference-example
+  namespace: default
+spec:
+  selector:
+    app: inference-example
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    name: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inference-example
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Cilium ingress controller settings
+    ingress.cilium.io/force-https-redirect: "true"
+    ingress.cilium.io/service-type: "LoadBalancer"
+spec:
+  ingressClassName: cilium
+  tls:
+  - hosts:
+    - inference-example.ml-cluster.dei.uc.pt
+    secretName: inference-example-tls
+  rules:
+  - host: inference-example.ml-cluster.dei.uc.pt
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: inference-example
+            port:
+              number: 80
+

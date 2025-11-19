@@ -10,7 +10,7 @@ spec:
       annotations:
         # gpu-fraction: "0.7"
         # gpu-type: "nvidia-rtx-a6000"
-        gpu-memory: "30720"
+        gpu-memory: "24576"
     spec:
       schedulerName: kai-scheduler
 #      nodeSelector:

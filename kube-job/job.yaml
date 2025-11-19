@@ -9,9 +9,6 @@ spec:
       containers:
         - name: evo-burgers
           image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
-          resources:
-            limits:
-              nvidia.com/gpu: "1"
           volumeMounts:
             - name: config-volume
               mountPath: /app/config.yml
