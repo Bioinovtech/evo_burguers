@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 nvcr.io/nvidia/cuda:12.9.1-cudnn-runtime-ubuntu24.04
+FROM --platform=linux/amd64 nvcr.io/nvidia/cuda:13.0.1-cudnn-runtime-ubuntu24.04
 LABEL maintainer="BIOINOVTECH info@bioinovtech.com"
 LABEL org.opencontainers.image.name="evo-burgers"
 LABEL org.opencontainers.image.version="latest"

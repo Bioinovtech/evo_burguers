@@ -1,0 +1,54 @@
+apiVersion: scheduling.run.ai/v2alpha2
+kind: PodGroup
+metadata:
+  name: test-cuda-12gb-replicas-group
+  namespace: cisuc
+spec:
+  minMember: 5
+  queue: cisuc-regular
+  priorityClassName: medium
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-cuda-12gb-replicas
+  namespace: cisuc
+  labels:
+    app: test-cuda-12gb-replicas
+    kai.scheduler/queue: cisuc-regular
+    scheduling.run.ai/queue-name: cisuc-regular
+    workload.kai-scheduler.dev/gpu-profile: "a6000-development"
+spec:
+  completions: 5
+  parallelism: 5
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: test-cuda-12gb-replicas
+        kai.scheduler/queue: cisuc-regular
+        scheduling.run.ai/queue-name: cisuc-regular
+        workload.kai-scheduler.dev/gpu-profile: "a6000-development"
+    spec:
+      schedulerName: kai-scheduler
+      priorityClassName: medium
+      containers:
+      - name: cuda-test
+        image: docker.io/nvidia/cuda:11.8.0-base-ubuntu22.04
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          echo "Starting 12GB CUDA Replica Test..."
+          nvidia-smi
+          # Sleep to ensure all replicas are running concurrently for validation
+          sleep 60
+          echo "Replica complete"
+        resources:
+          requests:
+            # Requesting 1 "slice" (12GB) defined by the profile.
+            nvidia.com/gpu: 1
+          limits:
+            nvidia.com/gpu: 1
+      restartPolicy: Never
+

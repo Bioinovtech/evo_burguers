@@ -23,7 +23,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: evo-burgers
-          image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
+          image: registry.ml-cluster.dei.uc.pt/library/evo-burgers:1.0
           volumeMounts:
             - name: config-volume
               mountPath: /app/config.yml
@@ -53,7 +53,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: evo-burgers
-          image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
+          image: registry.ml-cluster.dei.uc.pt/library/evo-burgers:1.0
           volumeMounts:
             - name: config-volume
               mountPath: /app/config.yml
@@ -83,7 +83,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: evo-burgers
-          image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
+          image: registry.ml-cluster.dei.uc.pt/library/evo-burgers:1.0
           volumeMounts:
             - name: config-volume
               mountPath: /app/config.yml

@@ -7,4 +7,4 @@ spec:
     spec:
       containers:
         - name: evo-burgers
-          image: registry.ml-cluster.dei.uc.pt/evo-burgers:1.0
+          image: registry.ml-cluster.dei.uc.pt/library/evo-burgers:1.0
