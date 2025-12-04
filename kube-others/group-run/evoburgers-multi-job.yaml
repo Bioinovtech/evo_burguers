@@ -112,7 +112,7 @@ metadata:
   namespace: cisuc
   labels:
     job-name: evo-burgers-multi-job
-    scheduling.run.ai/queue-name: cisuc-regular
+    kai.scheduler/queue: cisuc-regular
 spec:
   completions: 5
   parallelism: 5
@@ -121,7 +121,7 @@ spec:
     metadata:
       labels:
         job-name: evo-burgers-multi-job
-        scheduling.run.ai/queue-name: cisuc-regular
+        kai.scheduler/queue: cisuc-regular
     spec:
       schedulerName: kai-scheduler
       priorityClassName: high
