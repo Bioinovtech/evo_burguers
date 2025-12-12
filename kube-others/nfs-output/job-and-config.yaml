@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evo-burgers-config
+data:
+  config.yml: |
+    algorithm:
+      seed_list: [42]
+      cuda: "3"
+      predictor: 0
+      crossover_prob: 0.7
+      mutation_prob: 0.9
+      ind_mutation_prob: 0.2
+      num_generations: 5
+      pop_size: 10
+      tournament_size: 3
+      elitism: 1
+      lambda: 0.1
+      num_inference_steps: 50
+      guidance_scale: 7.5
+      vector_size: 15
+      height: 512
+      width: 512
+      model_id: "CompVis/stable-diffusion-v1-4"
+      experience_name: "paper_hamburgers"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: evo-burgers-job
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 30124
+        fsGroup: 30124
+      containers:
+        - name: evo-burgers
+          image: registry.ml-cluster.dei.uc.pt/library/evo-burgers:1.0
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/config.yml
+              subPath: config.yml
+            - name: results-nfs
+              mountPath: /app/results
+          env:
+            - name: DEBIAN_FRONTEND
+              value: noninteractive
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+      volumes:
+        - name: config-volume
+          configMap:
+            name: evo-burgers-config
+        - name: results-nfs
+          persistentVolumeClaim:
+            claimName: evo-burgers-nfs-pvc
+

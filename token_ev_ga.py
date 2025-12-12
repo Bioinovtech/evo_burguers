@@ -124,7 +124,12 @@ def run_for_seed(seed: int, cfg: dict, devices: List[str]) -> None:
     population = toolbox.population(n=cfg["pop_size"])
 
     # -------------------------------------------------------------- run GA
-    results_dir = Path("results") / f"{cfg['experience_name']}_pred{predictor_choice}_seed{seed}"
+    # Use POD_NAME env var if available (Kubernetes), otherwise use default path
+    pod_name = os.environ.get("POD_NAME")
+    if pod_name:
+        results_dir = Path("results") / pod_name / f"{cfg['experience_name']}_pred{predictor_choice}_seed{seed}"
+    else:
+        results_dir = Path("results") / f"{cfg['experience_name']}_pred{predictor_choice}_seed{seed}"
     results_dir.mkdir(parents=True, exist_ok=True)
 
     metrics: List[Tuple[float, float, float]] = []  # max, avg, std per gen
